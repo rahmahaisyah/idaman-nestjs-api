@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { CreatePenangkaranDto } from './dto/create-penangkaran.dto';
 import { UpdatePenangkaranDto } from './dto/update-penangkaran.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,22 +12,39 @@ export class PenangkaranService {
     private readonly penangkaranRepository: Repository<Penangkaran>,
   ) {}
 
-  create(createPenangkaranDto: CreatePenangkaranDto, userId: string) {
+  async create(createPenangkaranDto: CreatePenangkaranDto, userId: string) {
     const penangkaran = this.penangkaranRepository.create({
       ...createPenangkaranDto,
       userId,
     });
-    return this.penangkaranRepository.save(penangkaran);
+    
+    try {
+      return await this.penangkaranRepository.save(penangkaran);
+    } catch (error) {
+      if (error.code === '23503') { 
+        throw new BadRequestException(
+          'Referensi TSL dengan UUID tersebut tidak terdaftar di database.',
+        );
+      }
+      if (error.code === '23505') { 
+        throw new BadRequestException(
+          'Nomor SK (permitNumber) tersebut sudah terdaftar. Gunakan nomor SK yang unik.',
+        );
+      }
+      throw error;
+    }
   }
 
   findAll() {
-    return this.penangkaranRepository.find({ relations: { user: true } });
+    return this.penangkaranRepository.find({
+      relations: { user: true, referensiTsl: true },
+    });
   }
 
   findOne(id: string) {
     return this.penangkaranRepository.findOne({
       where: { id },
-      relations: { user: true },
+      relations: { user: true, referensiTsl: true },
     });
   }
 

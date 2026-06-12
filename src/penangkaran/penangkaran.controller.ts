@@ -8,8 +8,13 @@ import {
   Delete,
   UseGuards,
   Request,
+  ParseUUIDPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { PenangkaranService } from './penangkaran.service';
+import { AzureStorageService } from '../azure-storage/azure-storage.service';
 import { CreatePenangkaranDto } from './dto/create-penangkaran.dto';
 import { UpdatePenangkaranDto } from './dto/update-penangkaran.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -17,13 +22,22 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @Controller('penangkaran')
 export class PenangkaranController {
-  constructor(private readonly penangkaranService: PenangkaranService) {}
+  constructor(
+    private readonly penangkaranService: PenangkaranService,
+    private readonly azureStorageService: AzureStorageService,
+  ) {}
 
   @Post()
-  create(
+  @UseInterceptors(FileInterceptor('permitFile'))
+  async create(
     @Body() createPenangkaranDto: CreatePenangkaranDto,
+    @UploadedFile() file: Express.Multer.File,
     @Request() req: any,
   ) {
+    if (file) {
+      const url = await this.azureStorageService.uploadFile(file);
+      createPenangkaranDto.permitFileUrl = url;
+    }
     return this.penangkaranService.create(createPenangkaranDto, req.user.id);
   }
 
@@ -33,20 +47,26 @@ export class PenangkaranController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.penangkaranService.findOne(id);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @UseInterceptors(FileInterceptor('permitFile'))
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePenangkaranDto: UpdatePenangkaranDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
+    if (file) {
+      const url = await this.azureStorageService.uploadFile(file);
+      updatePenangkaranDto.permitFileUrl = url;
+    }
     return this.penangkaranService.update(id, updatePenangkaranDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.penangkaranService.remove(id);
   }
 }

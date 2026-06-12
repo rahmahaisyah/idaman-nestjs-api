@@ -1,0 +1,428 @@
+{
+  "info": {
+    "name": "Idaman NestJS API - Enterprise Edition",
+    "description": "Koleksi lengkap untuk menguji keseluruhan sistem CRUD API IDAMAN, mencakup Autentikasi, Taksonomi TSL, dan Lembaga Penangkaran dengan dukungan upload Cloud Azure.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@idaman.go.id\",\n    \"password\": \"password123\",\n    \"name\": \"Administrator\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.collectionVariables.set(\"jwt_token\", jsonData.access_token);",
+                  "    console.log(\"JWT Token otomatis disimpan ke variabel!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@idaman.go.id\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get Me (Profile)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Referensi TSL (Taxonomy)",
+      "item": [
+        {
+          "name": "Create Referensi TSL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jenis\": \"satwa_liar\",\n  \"namaDaerah\": \"Harimau Sumatera\",\n  \"namaIlmiah\": \"Panthera tigris sumatrae\",\n  \"kingdom\": \"Animalia\",\n  \"divisi\": \"Chordata\",\n  \"kelas\": \"Mammalia\",\n  \"ordo\": \"Carnivora\",\n  \"famili\": \"Felidae\",\n  \"genus\": \"Panthera\",\n  \"spesies\": \"P. tigris sumatrae\",\n  \"statusCites\": \"apendiks_i\",\n  \"statusIucn\": \"sangat_terancam_punah\",\n  \"statusPerlindunganNasional\": \"dilindungi\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/referensi-tsl",
+              "host": ["{{base_url}}"],
+              "path": ["referensi-tsl"]
+            }
+          }
+        },
+        {
+          "name": "Get All Referensi TSL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/referensi-tsl",
+              "host": ["{{base_url}}"],
+              "path": ["referensi-tsl"]
+            }
+          }
+        },
+        {
+          "name": "Get One Referensi TSL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/referensi-tsl/PASTE_UUID_DISINI",
+              "host": ["{{base_url}}"],
+              "path": ["referensi-tsl", "PASTE_UUID_DISINI"]
+            }
+          }
+        },
+        {
+          "name": "Update Referensi TSL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statusIucn\": \"terancam_punah\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/referensi-tsl/PASTE_UUID_DISINI",
+              "host": ["{{base_url}}"],
+              "path": ["referensi-tsl", "PASTE_UUID_DISINI"]
+            }
+          }
+        },
+        {
+          "name": "Delete Referensi TSL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/referensi-tsl/PASTE_UUID_DISINI",
+              "host": ["{{base_url}}"],
+              "path": ["referensi-tsl", "PASTE_UUID_DISINI"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Penangkaran (with Azure Upload)",
+      "item": [
+        {
+          "name": "Create Penangkaran",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "facilityName",
+                  "value": "Penangkaran Harimau Lestari",
+                  "type": "text"
+                },
+                {
+                  "key": "facilityAddress",
+                  "value": "Hutan Lindung Sumatera",
+                  "type": "text"
+                },
+                {
+                  "key": "referensiTslId",
+                  "value": "PASTE_UUID_REFERENSI_TSL",
+                  "type": "text"
+                },
+                {
+                  "key": "permitNumber",
+                  "value": "SK-12345",
+                  "type": "text"
+                },
+                {
+                  "key": "directorName",
+                  "value": "Budi Santoso",
+                  "type": "text"
+                },
+                {
+                  "key": "permitFile",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/penangkaran",
+              "host": ["{{base_url}}"],
+              "path": ["penangkaran"]
+            }
+          }
+        },
+        {
+          "name": "Get All Penangkaran",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/penangkaran",
+              "host": ["{{base_url}}"],
+              "path": ["penangkaran"]
+            }
+          }
+        },
+        {
+          "name": "Get One Penangkaran",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/penangkaran/PASTE_UUID_PENANGKARAN",
+              "host": ["{{base_url}}"],
+              "path": ["penangkaran", "PASTE_UUID_PENANGKARAN"]
+            }
+          }
+        },
+        {
+          "name": "Update Penangkaran",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "facilityName",
+                  "value": "Nama Baru Penangkaran",
+                  "type": "text"
+                },
+                {
+                  "key": "permitFile",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/penangkaran/PASTE_UUID_PENANGKARAN",
+              "host": ["{{base_url}}"],
+              "path": ["penangkaran", "PASTE_UUID_PENANGKARAN"]
+            }
+          }
+        },
+        {
+          "name": "Delete Penangkaran",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/penangkaran/PASTE_UUID_PENANGKARAN",
+              "host": ["{{base_url}}"],
+              "path": ["penangkaran", "PASTE_UUID_PENANGKARAN"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "jwt_token",
+      "value": ""
+    }
+  ]
+}

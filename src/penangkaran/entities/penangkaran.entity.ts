@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { ReferensiTsl } from '../../referensi-tsl/entities/referensi-tsl.entity';
 
 @Entity('penangkaran')
 export class Penangkaran {
@@ -15,13 +16,41 @@ export class Penangkaran {
   id: string;
 
   @Column()
-  name: string;
+  facilityName: string;
+
+  @Column({ unique: true, nullable: true })
+  permitNumber: string;
+
+  @Column({ type: 'date', nullable: true })
+  permitDate: Date;
+
+  @Column({ nullable: true })
+  permitFileUrl: string;
+
+  @Column({ nullable: true })
+  issuer: string;
+
+  @Column({ type: 'date', nullable: true })
+  validUntil: Date;
+
+  @Column({ nullable: true })
+  directorName: string;
+
+  @Column({ nullable: true })
+  phoneNumber: string;
+
+  @Column({ nullable: true })
+  officeAddress: string;
 
   @Column()
-  location: string;
+  facilityAddress: string;
+
+  @ManyToOne(() => ReferensiTsl, (referensi) => referensi.penangkarans)
+  @JoinColumn({ name: 'referensiTslId' })
+  referensiTsl: ReferensiTsl;
 
   @Column()
-  species: string;
+  referensiTslId: string;
 
   @ManyToOne(() => User, (user) => user.penangkarans, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
