@@ -7,6 +7,7 @@ describe('Auth & API Token (e2e)', () => {
   let app: INestApplication;
   let jwtToken: string;
   const testEmail = `tester-${Date.now()}@idaman.go.id`;
+  const testPassword = `Pass${Date.now()}`;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -27,7 +28,7 @@ describe('Auth & API Token (e2e)', () => {
       .post('/auth/register')
       .send({
         email: testEmail,
-        password: 'password123',
+        password: testPassword,
         name: 'Token Tester',
       })
       .expect(201)
@@ -40,7 +41,7 @@ describe('Auth & API Token (e2e)', () => {
   it('/auth/login (POST) - Uji Coba Generate Token', () => {
     return request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: testEmail, password: 'password123' })
+      .send({ email: testEmail, password: testPassword })
       .expect(200)
       .expect((res) => {
         expect(res.body.access_token).toBeDefined();
