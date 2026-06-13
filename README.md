@@ -1,77 +1,121 @@
 # Idaman Backend API - Technical Test
 
-This is a REST API Backend built with **NestJS** and **TypeScript**, addressing the technical test requirements for the Backend Engineer Intern position.
+![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 
-## Project Description
-A simplified application featuring two related entities: `User` and `Penangkaran` (Breeding Facility). The API implements robust authentication using JWT tokens and requires users to be authenticated before accessing the `Penangkaran` endpoints.
+Repositori ini berisi REST API Backend yang dibangun secara profesional menggunakan **NestJS**, **TypeScript**, dan **PostgreSQL**.
 
-## Features Met
-- **TypeScript & NestJS**: Built entirely with TypeScript on the NestJS framework.
-- **Relational Database**: Uses PostgreSQL for robust, structured data storage.
-- **CRUD Operations**: Complete CRUD for `User` and `Penangkaran` entities, linked by a One-to-Many relationship.
-- **JWT Authentication**: Secure login and token generation. Protected routes require a valid Bearer token.
-- **E2E Testing**: Includes E2E tests specifically for the authentication flow (`/auth/register`, `/auth/login`, and token verification).
-- **Design Patterns**: Implements standard, enterprise-ready patterns (see below).
-- **API Documentation**: [Dokumentasi API Postman](https://documenter.getpostman.com/view/51010779/2sBXwsLqEi)
+---
 
-## Running the Application
+## Pencapaian Fitur (Poin Technical Test)
 
-### 1. Database Setup
-This project uses PostgreSQL. A `docker-compose.yml` file is provided for your convenience.
-```bash
-# Start the PostgreSQL database
-docker-compose up -d
+- **Sistem Autentikasi (JWT):** Implementasi registrasi dan login yang aman. Rute API dilindungi dengan ketat menggunakan `JwtAuthGuard`.
+- **Manajemen Data Relasional:** Operasi CRUD lengkap untuk entitas `User`, `ReferensiTsl` (Taksonomi), dan `Penangkaran`, dengan validasi Foreign Key yang ketat.
+- **Penyimpanan Cloud (Azure Blob):** Integrasi langsung dengan **Azure Blob Storage** via `@nestjs/platform-express` (`FileInterceptor`) untuk menangani unggahan dokumen izin (`multipart/form-data`).
+- **Penanganan Error:** Penanganan error tingkat lanjut yang menangkap pelanggaran constraint PostgreSQL (misal: `23503` Foreign Key, `23505` Unique) dan mengubahnya menjadi pesan HTTP 400/409 yang mudah dipahami klien.
+- **Pengujian Otomatis :** Unit Test berhasil 100% menggunakan Jest Mock Providers, serta End-to-End (E2E) Test spesifik yang berfokus pada siklus hidup Token API.
+- **Dokumentasi API Terstruktur:** [Lihat Dokumentasi API Lengkap di Postman](https://documenter.getpostman.com/view/51010779/2sBXwsLqEi)
+
+---
+
+## Arsitektur Sistem
+
+Aplikasi ini menggunakan arsitektur cloud-native modern yang di-hosting sepenuhnya di ekosistem Microsoft Azure.
+
+```mermaid
+graph TD
+    Client[Aplikasi Frontend / Postman] -->|HTTP REST / Port 3000| API(NestJS API di Azure VM)
+    
+    subgraph Lingkungan Cloud Azure
+        API -->|TypeORM / Port 5432| DB[(Database PostgreSQL)]
+        API -->|Azure SDK| Blob[Azure Blob Storage]
+    end
+    
+    style API fill:#e0234e,stroke:#fff,stroke-width:2px,color:#fff
+    style DB fill:#336791,stroke:#fff,stroke-width:2px,color:#fff
+    style Blob fill:#0072C6,stroke:#fff,stroke-width:2px,color:#fff
 ```
 
-### 2. Installation
-```bash
-# Install dependencies
-npm install
+---
+
+## Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    USERS {
+        uuid id PK
+        string email UK
+        string password
+        string name
+        timestamp createdAt
+        timestamp updatedAt
+    }
+    
+    REFERENSI_TSL {
+        uuid id PK
+        enum jenis "satwa_liar, tumbuhan"
+        string namaDaerah
+        string namaIlmiah
+        enum statusCites
+        enum statusIucn
+        timestamp createdAt
+        timestamp updatedAt
+    }
+
+    PENANGKARAN {
+        uuid id PK
+        string facilityName
+        string facilityAddress
+        uuid referensiTslId FK
+        string permitNumber UK
+        string permitFileUrl
+        string directorName
+        timestamp createdAt
+        timestamp updatedAt
+    }
+
+    REFERENSI_TSL ||--o{ PENANGKARAN : "memiliki relasi dengan"
 ```
+---
 
-### 3. Environment Variables
-Create a `.env` file in the root directory (or use the provided one):
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=<MASUKKAN_PASSWORD_DB_ANDA>
-DB_NAME=idaman_nestjs
-JWT_SECRET=<MASUKKAN_JWT_SECRET_ACAK_ANDA>
-```
+## Pola Desain (Design Patterns)
 
-### 4. Running the App
-```bash
-# Development
-npm run start:dev
-
-# Production build
-npm run build
-npm run start:prod
-```
-
-### 5. Running Tests
-```bash
-# Run End-to-End tests
-npm run test:e2e
-```
-
-## Design Patterns Used
-
-NestJS enforces several software design patterns natively. Here are the key patterns utilized in this application and why:
+NestJS secara native mewajibkan penerapan pola desain Software Engineering yang baik. Berikut adalah pola utama yang digunakan:
 
 1. **Dependency Injection (DI) Pattern**
-   - **Where**: Everywhere. `UsersService`, `AuthService`, etc., are injected into controllers and other services via constructors.
-   - **Why**: It decouples object creation from object usage. This makes the code highly modular, testable (via mocking), and easier to maintain.
-
-2. **Repository Pattern (via TypeORM)**
-   - **Where**: Services interact with the database using injected `Repository<Entity>` instances (e.g., `this.usersRepository.find()`).
-   - **Why**: It abstracts the data layer. The business logic inside services doesn't need to know if the underlying database is PostgreSQL, MySQL, or MongoDB. It only interacts with the generic Repository interface, making database swaps or testing much easier.
-
+   - **Alasan**: Memisahkan pembuatan objek dari penggunaannya. Modul seperti `AzureStorageService` atau `UsersRepository` disuntikkan melalui konstruktor, memudahkan pengujian (mocking) dan modularitas.
+2. **Repository Pattern**
+   - **Alasan**: Mengabstraksi lapisan data. Logika bisnis hanya berinteraksi dengan antarmuka generik `Repository<Entity>` dari TypeORM, memisahkan logika SQL murni dari aturan aplikasi.
 3. **Decorator Pattern**
-   - **Where**: `@Controller()`, `@Injectable()`, `@Get()`, `@UseGuards(JwtAuthGuard)`.
-   - **Why**: It allows adding behavior to classes or methods dynamically and declaratively without modifying their code directly. This keeps the code clean and focused on business logic rather than wiring.
+   - **Alasan**: Digunakan secara ekstensif (seperti `@Controller()`, `@UseGuards()`) untuk menambahkan behavior dan pengecekan keamanan secara dinamis tanpa merusak kode inti.
+4. **Data Transfer Object (DTO) Pattern**
+   - **Alasan**: Memaksa validasi payload yang ketat (`class-validator`) di gerbang masuk sebelum data menyentuh lapisan controller.
 
-4. **Module Pattern**
-   - **Where**: `AppModule`, `UsersModule`, `AuthModule`.
-   - **Why**: NestJS groups related features into encapsulated modules. This ensures high cohesion and low coupling across the application, adhering to the Single Responsibility Principle on an architectural level.
+---
+
+## Panduan Instalasi & Menjalankan Aplikasi
+
+### Prasyarat
+Pastikan laptop Anda telah terpasang **Node.js 20+**. Anda tidak perlu memasang database lokal karena aplikasi akan langsung menembak ke server Azure.
+
+### Pengaturan Environment (.env)
+Untuk alasan keamanan, file `.env` tidak disertakan di dalam repositori publik ini. Silakan unduh file rahasia tersebut yang telah dikunci melalui tautan Google Drive berikut, lalu letakkan di dalam folder proyek ini:
+
+**[Tautan .env](https://drive.google.com/file/d/1cNlWGBlEvMRXP6xTo33FULgXwZAcx5nc/view?usp=sharing)**
+
+> **Catatan:** Kata sandi (password) untuk mengekstrak file ZIP ini dapat ditemukan pada lampiran video demonstrasi di menit ke-
+
+### Instalasi & Eksekusi
+
+```bash
+# 1. Instal semua dependensi
+npm install
+
+# 2. Jalankan API di lingkungan pengembangan (Development)
+npm run start:dev
+
+# 3. Jalankan pengujian otomatis (Unit Test & E2E)
+npm run test
+npm run test:e2e
+```
