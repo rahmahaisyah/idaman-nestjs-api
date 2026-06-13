@@ -16,34 +16,31 @@ export class Penangkaran {
   id: string;
 
   @Column()
-  facilityName: string;
+  namaFasilitas: string;
 
   @Column({ unique: true, nullable: true })
-  permitNumber: string;
+  nomorIzin: string;
 
   @Column({ type: 'date', nullable: true })
-  permitDate: Date;
+  tanggalIzin: Date;
 
   @Column({ nullable: true })
-  permitFileUrl: string;
+  fileIzinUrl: string;
 
   @Column({ nullable: true })
-  issuer: string;
+  penerbitIzin: string;
 
   @Column({ type: 'date', nullable: true })
-  validUntil: Date;
+  berlakuSampai: Date;
 
   @Column({ nullable: true })
-  directorName: string;
+  namaPimpinan: string;
 
   @Column({ nullable: true })
-  phoneNumber: string;
+  nomorTelepon: string;
 
   @Column({ nullable: true })
-  officeAddress: string;
-
-  @Column()
-  facilityAddress: string;
+  alamatKantor: string;
 
   @ManyToOne(() => ReferensiTsl, (referensi) => referensi.penangkarans)
   @JoinColumn({ name: 'referensiTslId' })

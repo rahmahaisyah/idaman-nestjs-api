@@ -28,7 +28,7 @@ export class PenangkaranService {
       }
       if (error.code === '23505') { 
         throw new BadRequestException(
-          'Nomor SK (permitNumber) tersebut sudah terdaftar. Gunakan nomor SK yang unik.',
+          'Nomor Izin (nomorIzin) tersebut sudah terdaftar. Gunakan nomor izin yang unik.',
         );
       }
       throw error;

@@ -9,43 +9,40 @@ import {
 export class CreatePenangkaranDto {
   @IsString()
   @IsNotEmpty()
-  facilityName: string;
+  namaFasilitas: string;
 
   @IsOptional()
   @IsString()
-  permitNumber?: string;
+  nomorIzin?: string;
 
   @IsOptional()
   @IsDateString()
-  permitDate?: string;
+  tanggalIzin?: string;
 
   @IsOptional()
   @IsString()
-  permitFileUrl?: string;
+  fileIzinUrl?: string;
 
   @IsOptional()
   @IsString()
-  issuer?: string;
+  penerbitIzin?: string;
 
   @IsOptional()
   @IsDateString()
-  validUntil?: string;
+  berlakuSampai?: string;
 
   @IsOptional()
   @IsString()
-  directorName?: string;
+  namaPimpinan?: string;
 
   @IsOptional()
   @IsString()
-  phoneNumber?: string;
+  nomorTelepon?: string;
 
   @IsOptional()
   @IsString()
-  officeAddress?: string;
+  alamatKantor?: string;
 
-  @IsString()
-  @IsNotEmpty()
-  facilityAddress: string;
 
 
 

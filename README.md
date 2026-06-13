@@ -65,12 +65,11 @@ erDiagram
 
     PENANGKARAN {
         uuid id PK
-        string facilityName
-        string facilityAddress
+        string namaFasilitas
         uuid referensiTslId FK
-        string permitNumber UK
-        string permitFileUrl
-        string directorName
+        string nomorIzin UK
+        string fileIzinUrl
+        string namaPimpinan
         timestamp createdAt
         timestamp updatedAt
     }

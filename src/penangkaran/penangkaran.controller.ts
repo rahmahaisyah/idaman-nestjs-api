@@ -28,7 +28,7 @@ export class PenangkaranController {
   ) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('permitFile'))
+  @UseInterceptors(FileInterceptor('fileIzin'))
   async create(
     @Body() createPenangkaranDto: CreatePenangkaranDto,
     @UploadedFile() file: Express.Multer.File,
@@ -36,7 +36,7 @@ export class PenangkaranController {
   ) {
     if (file) {
       const url = await this.azureStorageService.uploadFile(file);
-      createPenangkaranDto.permitFileUrl = url;
+      createPenangkaranDto.fileIzinUrl = url;
     }
     return this.penangkaranService.create(createPenangkaranDto, req.user.id);
   }
@@ -52,7 +52,7 @@ export class PenangkaranController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('permitFile'))
+  @UseInterceptors(FileInterceptor('fileIzin'))
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePenangkaranDto: UpdatePenangkaranDto,
@@ -60,7 +60,7 @@ export class PenangkaranController {
   ) {
     if (file) {
       const url = await this.azureStorageService.uploadFile(file);
-      updatePenangkaranDto.permitFileUrl = url;
+      updatePenangkaranDto.fileIzinUrl = url;
     }
     return this.penangkaranService.update(id, updatePenangkaranDto);
   }
