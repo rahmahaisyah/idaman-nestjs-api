@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from './../src/app.module';
 
-describe('Auth & Penangkaran (e2e)', () => {
+describe('Auth & API Token (e2e)', () => {
   let app: INestApplication;
   let jwtToken: string;
+  const testEmail = `tester-${Date.now()}@idaman.go.id`;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -25,39 +26,39 @@ describe('Auth & Penangkaran (e2e)', () => {
     return request(app.getHttpServer())
       .post('/auth/register')
       .send({
-        email: 'test@example.com',
+        email: testEmail,
         password: 'password123',
-        name: 'Test User',
+        name: 'Token Tester',
       })
       .expect(201)
       .expect((res) => {
-        expect(res.body.email).toEqual('test@example.com');
+        expect(res.body.email).toEqual(testEmail);
         expect(res.body.password).toBeUndefined();
       });
   });
 
-  it('/auth/login (POST)', () => {
+  it('/auth/login (POST) - Uji Coba Generate Token', () => {
     return request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: 'test@example.com', password: 'password123' })
+      .send({ email: testEmail, password: 'password123' })
       .expect(200)
       .expect((res) => {
         expect(res.body.access_token).toBeDefined();
-        jwtToken = res.body.access_token;
+        jwtToken = res.body.access_token; // <--- INI ADALAH PROSES MENGAMBIL TOKEN E2E
       });
   });
 
-  it('/users/me (GET) - unauthenticated', () => {
-    return request(app.getHttpServer()).get('/users/me').expect(401);
+  it('/users/me (GET) - Uji Coba Tanpa Token (Harus Gagal 401)', () => {
+    return request(app.getHttpServer()).get('/users/me').expect(401); // Ditolak karena tidak ada JWT
   });
 
-  it('/users/me (GET) - authenticated', () => {
+  it('/users/me (GET) - Uji Coba Memakai Token (Harus Sukses 200)', () => {
     return request(app.getHttpServer())
       .get('/users/me')
-      .set('Authorization', `Bearer ${jwtToken}`)
+      .set('Authorization', `Bearer ${jwtToken}`) // <--- MENYISIPKAN TOKEN JWT KE HEADER
       .expect(200)
       .expect((res) => {
-        expect(res.body.email).toEqual('test@example.com');
+        expect(res.body.email).toEqual(testEmail);
       });
   });
 });
