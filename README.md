@@ -41,19 +41,7 @@ Beberapa design pattern utama yang digunakan dalam project ini adalah:
 
 Aplikasi ini menggunakan arsitektur cloud-native modern yang di-hosting sepenuhnya di ekosistem Microsoft Azure.
 
-```mermaid
-graph TD
-    Client[Aplikasi Frontend / Postman] -->|HTTP REST / Port 3000| API(NestJS API di Azure VM)
-    
-    subgraph Lingkungan Cloud Azure
-        API -->|TypeORM / Port 5432| DB[(Database PostgreSQL)]
-        API -->|Azure SDK| Blob[Azure Blob Storage]
-    end
-    
-    style API fill:#e0234e,stroke:#fff,stroke-width:2px,color:#fff
-    style DB fill:#336791,stroke:#fff,stroke-width:2px,color:#fff
-    style Blob fill:#0072C6,stroke:#fff,stroke-width:2px,color:#fff
-```
+<img width="3843" height="1293" alt="Arsitektur Sistem IDAMAN" src="https://github.com/user-attachments/assets/67b320fe-bb11-4e99-a2d7-01040cc71fed" />
 
 ---
 
