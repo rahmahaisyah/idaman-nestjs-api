@@ -8,14 +8,32 @@ Repositori ini berisi REST API Backend yang dibangun secara profesional mengguna
 
 ---
 
-## Pencapaian Fitur (Poin Technical Test)
+## Spesifikasi Sistem
 
 - **Sistem Autentikasi (JWT):** Implementasi registrasi dan login yang aman. Rute API dilindungi dengan ketat menggunakan `JwtAuthGuard`.
-- **Manajemen Data Relasional:** Operasi CRUD lengkap untuk entitas `User`, `ReferensiTsl` (Taksonomi), dan `Penangkaran`, dengan validasi Foreign Key yang ketat.
+- **Database SQL:** Sistem menggunakan PostgreSQL sebagai database SQL untuk menyimpan data relasional.
+- **Manajemen Data Relasional:** Operasi CRUD lengkap diterapkan pada entitas `ReferensiTsl` dan `Penangkaran` yang saling berelasi melalui *Foreign Key*, di mana data Penangkaran wajib merujuk pada data taksonomi yang valid pada ReferensiTsl.
 - **Penyimpanan Cloud (Azure Blob):** Integrasi langsung dengan **Azure Blob Storage** via `@nestjs/platform-express` (`FileInterceptor`) untuk menangani unggahan dokumen izin (`multipart/form-data`).
 - **Penanganan Error:** Penanganan error tingkat lanjut yang menangkap pelanggaran constraint PostgreSQL (misal: `23503` Foreign Key, `23505` Unique) dan mengubahnya menjadi pesan HTTP 400/409 yang mudah dipahami klien.
-- **Pengujian Otomatis :** Unit Test berhasil 100% menggunakan Jest Mock Providers, serta End-to-End (E2E) Test spesifik yang berfokus pada siklus hidup Token API.
+- **Pengujian Otomatis:** Unit Test berhasil 100% menggunakan Jest Mock Providers, serta End-to-End (E2E) Test berfokus pada siklus hidup JWT Token, mulai dari login untuk mendapatkan token, akses endpoint protected menggunakan token valid, hingga validasi penolakan akses tanpa token atau dengan token tidak valid.
 - **Dokumentasi API Terstruktur:** [Lihat Dokumentasi API Lengkap di Postman](https://documenter.getpostman.com/view/51010779/2sBXwsLqEi)
+
+---
+
+## Pattern Project & Design Patterns
+
+Project ini menggunakan pendekatan **Modular Architecture** khas NestJS, dengan pemisahan tanggung jawab ke dalam module, controller, service, repository, dan DTO. Pattern ini dipilih agar struktur kode lebih mudah dipelihara, diuji, dan dikembangkan secara terpisah berdasarkan fitur.
+
+Beberapa design pattern utama yang digunakan dalam project ini adalah:
+
+1. **Dependency Injection (DI) Pattern**
+   - **Alasan**: Memisahkan pembuatan objek dari penggunaannya. Modul seperti `AzureStorageService` atau `UsersRepository` disuntikkan melalui konstruktor, memudahkan pengujian (mocking) dan modularitas.
+2. **Repository Pattern**
+   - **Alasan**: Mengabstraksi lapisan data. Logika bisnis hanya berinteraksi dengan antarmuka generik `Repository<Entity>` dari TypeORM, memisahkan logika SQL murni dari aturan aplikasi.
+3. **Decorator Pattern**
+   - **Alasan**: Digunakan secara ekstensif (seperti `@Controller()`, `@UseGuards()`) untuk menambahkan behavior dan pengecekan keamanan secara dinamis tanpa merusak kode inti.
+4. **Data Transfer Object (DTO) Pattern**
+   - **Alasan**: Menerapkan validasi payload yang ketat menggunakan `class-validator` sebelum data diproses oleh controller atau service.
 
 ---
 
@@ -54,7 +72,7 @@ erDiagram
     
     REFERENSI_TSL {
         uuid id PK
-        enum jenis "satwa_liar, tumbuhan"
+        enum jenis 
         string namaDaerah
         string namaIlmiah
         enum statusCites
@@ -74,36 +92,42 @@ erDiagram
         timestamp updatedAt
     }
 
-    REFERENSI_TSL ||--o{ PENANGKARAN : "memiliki relasi dengan"
+    REFERENSI_TSL ||--o{ PENANGKARAN
 ```
+
 ---
 
-## Pola Desain (Design Patterns)
+## Dokumentasi API
 
-NestJS secara native mewajibkan penerapan pola desain Software Engineering yang baik. Berikut adalah pola utama yang digunakan:
+Dokumentasi lengkap endpoint API dapat diakses melalui Postman:
 
-1. **Dependency Injection (DI) Pattern**
-   - **Alasan**: Memisahkan pembuatan objek dari penggunaannya. Modul seperti `AzureStorageService` atau `UsersRepository` disuntikkan melalui konstruktor, memudahkan pengujian (mocking) dan modularitas.
-2. **Repository Pattern**
-   - **Alasan**: Mengabstraksi lapisan data. Logika bisnis hanya berinteraksi dengan antarmuka generik `Repository<Entity>` dari TypeORM, memisahkan logika SQL murni dari aturan aplikasi.
-3. **Decorator Pattern**
-   - **Alasan**: Digunakan secara ekstensif (seperti `@Controller()`, `@UseGuards()`) untuk menambahkan behavior dan pengecekan keamanan secara dinamis tanpa merusak kode inti.
-4. **Data Transfer Object (DTO) Pattern**
-   - **Alasan**: Memaksa validasi payload yang ketat (`class-validator`) di gerbang masuk sebelum data menyentuh lapisan controller.
+[Lihat Dokumentasi API Lengkap di Postman](https://documenter.getpostman.com/view/51010779/2sBXwsLqEi)
 
 ---
 
 ## Panduan Instalasi & Menjalankan Aplikasi
 
 ### Prasyarat
-Pastikan laptop Anda telah terpasang **Node.js 20+**. Anda tidak perlu memasang database lokal karena aplikasi akan langsung menembak ke server Azure.
+Pastikan laptop Anda telah terpasang **Node.js 20+**. Anda tidak perlu memasang database lokal karena aplikasi dikonfigurasi untuk terhubung langsung ke database PostgreSQL pada server Azure.
 
 ### Pengaturan Environment (.env)
-Untuk alasan keamanan, file `.env` tidak disertakan di dalam repositori publik ini. Silakan unduh file rahasia tersebut yang telah dikunci melalui tautan Google Drive berikut, lalu letakkan di dalam folder proyek ini:
 
-**[Tautan .env](https://drive.google.com/file/d/1cNlWGBlEvMRXP6xTo33FULgXwZAcx5nc/view?usp=sharing)**
+Untuk alasan keamanan, file `.env` tidak disertakan di dalam repository publik. Gunakan file `.env.example` sebagai acuan konfigurasi environment variable yang dibutuhkan.
 
-> **Catatan:** Kata sandi (password) untuk mengekstrak file ZIP ini dapat ditemukan pada lampiran video demonstrasi di menit ke-
+Contoh konfigurasi:
+
+```env
+DATABASE_HOST=
+DATABASE_PORT=
+DATABASE_USERNAME=
+DATABASE_PASSWORD=
+DATABASE_NAME=
+JWT_SECRET=
+AZURE_STORAGE_CONNECTION_STRING=
+AZURE_CONTAINER_NAME=
+```
+Setelah konfigurasi diisi, simpan file tersebut sebagai `.env` di root folder project.
+
 
 ### Instalasi & Eksekusi
 
