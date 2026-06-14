@@ -92,7 +92,7 @@ erDiagram
         timestamp updatedAt
     }
 
-    REFERENSI_TSL ||--o{ PENANGKARAN
+    REFERENSI_TSL ||--o{ PENANGKARAN : ""
 ```
 
 ---
